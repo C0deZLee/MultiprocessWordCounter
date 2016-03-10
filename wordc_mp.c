@@ -5,8 +5,10 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <sys/time.h>
 #include <stdbool.h>
 
@@ -135,26 +137,51 @@ void print_result(char *result_filename, char *runtime_filename, long runtime){
 
 // main funtion start here
 int main(int argc, char *argv[]) {
-    if (argc != 4){
-        printf("Expected 3 arguments, given %d", argc);
+    if (argc != 5){
+        printf("Expected 4 arguments, given %d", argc-1);
     }
     else{
         // set the start time
         struct timeval start, end;
         gettimeofday(&start, NULL);
 
-        char *raw_str = (char *) malloc (512 * sizeof(char)), *formatted_str = (char *) malloc (512 * sizeof(char));
+        // read file
+        char *raw_str = (char *) malloc (128 * sizeof(char)), *formatted_str = (char *) malloc (128 * sizeof(char));
         FILE *fp = fopen(argv[1], "r");
+
         if (fp == NULL) {
             perror("Failed to open file");
             exit(1);
         }
 
-        // read words from the file until reach the end of file
-        while (fscanf(fp, "%s", raw_str) != EOF) {
-            formatted_str = word_format(raw_str);
-            search_in_list(formatted_str);
+        // get the total length of the file
+        int word_counter = 0;
+
+        while(fscanf(fp, "%s", raw_str) != EOF)
+            word_counter++;
+
+        // set up muti-process
+        pid_t child_pid;
+
+        for (int i=0; i<argv[4]; i++) { // the fourth arg points out how many process we need (according to the project description)
+            int fragment_size = word_counter/(int)argv[4]; // get the fragment size for every child process
+            child_pid = fork(); // create new process
+
+            if (child_pid > 0) { // This is a parent process
+
+                // get all mini part from child process
+                // put them together
+                // sort it
+
+            }
+            else if (child_pid == 0) { // This is a child process
+
+                // get
+            }
+
+            else printf("Failed to create new processes");
         }
+
 
         // get the total runtime
         gettimeofday(&end, NULL);

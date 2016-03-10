@@ -4,3 +4,5 @@
 *.xml
 
 .idea/Muti-process-Word-Counter.iml
+
+CMakeLists.txt
