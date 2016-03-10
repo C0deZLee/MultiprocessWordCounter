@@ -1,8 +1,9 @@
 //
-// Created by Li Xiang on 2/13/16.
+//
 //
 
 #include <stdio.h>
+#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
