@@ -153,23 +153,25 @@ int main(int argc, char *argv[]) {
         word_num++;
     }
 
-    pid_t child_pid;                                    // set up multi-process
+    pid_t child_pid;                                        // set up multi-process
 
-    for (int i=0; i<argv[4]; i++) {                     // the fourth arg points out how many process we need (according to the project description)
+    for (int i=0; i<(int)argv[4]; i++) {                    // the fourth arg points out how many process we need (according to the project description)
 
         int fragment_size = word_num/(int)argv[4];      // get the fragment size for every child process
         child_pid = fork();                             // create new process
 
         if (child_pid > 0) {                            // This is a PARENT process
-
-            // get all mini part from child process
+            // sort the first 1/argv[4] of file
+            // get all sorted fragment from child process
             // put them together
             // sort it
-
+            
         }
+
         else if (child_pid == 0) {                      // This is a CHILD process
-            char* fragment = ;
-            // get
+            // char* fragment = file(from i/word_num to i*word_num);
+            // call the search_in_list(fragment);
+            // pipe the result to parent
         }
 
         else printf("Failed to create new processes");
