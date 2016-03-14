@@ -129,60 +129,61 @@ void print_result(char *result_filename, char *runtime_filename, long runtime){
 int main(int argc, char *argv[]) {
     if (argc != 5){
         printf("Expected 4 arguments, given %d", argc-1);
+        return -1;
     }
-    else{
 
-        struct timeval start, end;                                          // set the start time
-        gettimeofday(&start, NULL);
+    struct timeval start, end;                                          // set the start time
+    gettimeofday(&start, NULL);
 
 
-        char *raw_str = (char *) malloc (128 * sizeof(char)),              // read file
-                *formatted_str = (char *) malloc (128 * sizeof(char));
-        FILE *fp = fopen(argv[1], "r");
+    char *raw_str = (char *) malloc (128 * sizeof(char)),              // read file
+            *formatted_str = (char *) malloc (128 * sizeof(char));
+    FILE *fp = fopen(argv[1], "r");
 
-        if (fp == NULL) {
-            perror("Failed to open file");
-            exit(1);
+    if (fp == NULL) {
+        perror("Failed to open file");
+        exit(1);
+    }
+
+    char *file = (char *) malloc (100000 * sizeof (char));  // set up a string to save the whole file
+    int word_num = 0;                                       // get the total length of the file
+
+    while(fscanf(fp, "%s", raw_str) != EOF) {               // save the file into string
+        file[word_num] = word_format(raw_str);
+        word_num++;
+    }
+
+    pid_t child_pid;                                    // set up multi-process
+
+    for (int i=0; i<argv[4]; i++) {                     // the fourth arg points out how many process we need (according to the project description)
+
+        int fragment_size = word_num/(int)argv[4];      // get the fragment size for every child process
+        child_pid = fork();                             // create new process
+
+        if (child_pid > 0) {                            // This is a PARENT process
+
+            // get all mini part from child process
+            // put them together
+            // sort it
+
+        }
+        else if (child_pid == 0) {                      // This is a CHILD process
+            char* fragment = ;
+            // get
         }
 
-        int word_counter = 0;                                // get the total length of the file
-
-        while(fscanf(fp, "%s", raw_str) != EOF)
-            word_counter++;
-
-        char *file;  //TODO
-
-        pid_t child_pid;                                    // set up multi-process
-
-        for (int i=0; i<argv[4]; i++) {                     // the fourth arg points out how many process we need (according to the project description)
-
-            int fragment_size = word_counter/(int)argv[4];  // get the fragment size for every child process
-            child_pid = fork();                             // create new process
-
-            if (child_pid > 0) {                            // This is a PARENT process
-
-                // get all mini part from child process
-                // put them together
-                // sort it
-
-            }
-            else if (child_pid == 0) {                      // This is a CHILD process
-                char* fragment = ;
-                // get
-            }
-
-            else printf("Failed to create new processes");
-        }
-
-
-
-        gettimeofday(&end, NULL);                           // get the total runtime
-        long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
-
-        print_result(argv[2], argv[3], runtime);            // print the result
-
-        fclose(fp);                                         // close the file
-        printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+        else printf("Failed to create new processes");
     }
+
+
+
+    gettimeofday(&end, NULL);                           // get the total runtime
+    long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
+
+    print_result(argv[2], argv[3], runtime);            // print the result
+
+    fclose(fp);                                         // close the file
+    printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+
     return 0;
 }
