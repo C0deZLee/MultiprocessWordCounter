@@ -12,7 +12,7 @@
 #include <sys/time.h>
 #include <stdbool.h>
 
-// structure definition
+/* structure definition */
 typedef struct word_count {
     char *word;
     int count;
@@ -20,11 +20,11 @@ typedef struct word_count {
     struct word_count *next;
 } word_count;
 
-// Global variable
+/* Global variable */
 word_count *HEAD = NULL;
 word_count *TAIL = NULL;
 
-// create a new list if we don't have a list
+/* reate a new list if we don't have a list */
 int create_list(char *val) {
     struct word_count *curr = (word_count*) malloc (sizeof(word_count));
     curr->word = val, curr->count = 1, curr->last = NULL, curr->next = NULL;
@@ -35,7 +35,7 @@ int create_list(char *val) {
     return 0;
 }
 
-// add a new node to the RIGHT POSITION of the list
+/* add a new node to the RIGHT POSITION of the list */
 int add_to_list(char *val) {
     if (HEAD == NULL)
         return (create_list(val));
@@ -43,12 +43,8 @@ int add_to_list(char *val) {
     struct word_count *curr = (word_count*) malloc (sizeof(word_count));
     curr->word = val, curr->count = 1, curr->last = NULL, curr->next = NULL;
 
-
-    // start at the first element
-    for(struct word_count *search=HEAD; search!=NULL; search=search->next){
-
-        // put front
-        if (strcmp (curr->word, search->word) < 0){
+    for(struct word_count *search=HEAD; search!=NULL; search=search->next){            // start at the first element
+        if (strcmp (curr->word, search->word) < 0){                                    // put front
             curr->next = search;
             curr->last = search->last;
             if(search->last != NULL) {
@@ -62,8 +58,8 @@ int add_to_list(char *val) {
             return 0;
         }
 
-        // put behind
-        if(strcmp (curr->word, search->word)>0 && (search->next == NULL ||strcmp(curr->word, search->next->word)<0)){
+        if(strcmp (curr->word, search->word)>0 &&
+                (search->next == NULL || strcmp(curr->word, search->next->word)<0)){  // put behind
             curr->next = search->next;
             curr->last = search;
             if(search->next != NULL) {
@@ -80,73 +76,68 @@ int add_to_list(char *val) {
     return -1;
 }
 
-// search in list
+/* search the word in current list */
 int search_in_list(char *val) {
-    // no list then create one
+
     if (HEAD == NULL)
         return (create_list(val));
-    // search from the HEAD
-    for (struct word_count *curr = HEAD; curr != NULL; curr = curr->next) {
+
+    for (struct word_count *curr = HEAD; curr != NULL; curr = curr->next) {          // search from the HEAD
         if (strcmp(curr->word, val) == 0) {
             curr->count++;
             return 0;
         }
     }
-    // not in list then add to list
-    add_to_list(val);
+    add_to_list(val);                                                                // not in list then add to list
 
     return 0;
 }
 
-//Remove punctuation and make all lowercase
+/* Remove punctuation and make all lowercase */
 char *word_format(char *raw_str) {
 
     char *formatted = (char *) malloc(strlen(raw_str)+1), *final = formatted;
 
     while (*raw_str) {
-        if (ispunct(*raw_str)) {
-            // skip it
+        if (ispunct(*raw_str)) {                                             // skip it
             raw_str++;
         }
         else if (isupper(*raw_str)) {
-            // make it lowercase
-            *formatted++ = tolower(*raw_str++);
+            *formatted++ = tolower(*raw_str++);                              // make it lowercase
         }
         else {
-            // increment both pointers and copying
-            *formatted++ = *raw_str++;
+            *formatted++ = *raw_str++;                                       // increment both pointers and copying
         }
     }
     return final;
 }
 
-//print the result into files
+/* print the result into files */
 void print_result(char *result_filename, char *runtime_filename, long runtime){
-    // write file
-    FILE *fp;
-    // print the result into result_filename
-    fp = fopen(result_filename, "w+");
+    FILE *fp;                                                                   // create the file pointer
+    fp = fopen(result_filename, "w+");                                          // print the result into result_filename
     for(struct word_count *curr = HEAD;curr != NULL;curr = curr->next)
         fprintf(fp,"%s, %d\n", curr->word, curr->count);
-    // print the runtime into runtime_filename
-    fp = fopen(runtime_filename, "w+");
+
+    fp = fopen(runtime_filename, "w+");                                         // print the runtime into runtime_filename
     fprintf(fp,"The total runtime is %ld\n-------------------", runtime);
     // close the file
     fclose(fp);
 }
 
-// main funtion start here
+/* main function start here */
 int main(int argc, char *argv[]) {
     if (argc != 5){
         printf("Expected 4 arguments, given %d", argc-1);
     }
     else{
-        // set the start time
-        struct timeval start, end;
+
+        struct timeval start, end;                                          // set the start time
         gettimeofday(&start, NULL);
 
-        // read file
-        char *raw_str = (char *) malloc (128 * sizeof(char)), *formatted_str = (char *) malloc (128 * sizeof(char));
+
+        char *raw_str = (char *) malloc (128 * sizeof(char)),              // read file
+                *formatted_str = (char *) malloc (128 * sizeof(char));
         FILE *fp = fopen(argv[1], "r");
 
         if (fp == NULL) {
@@ -154,28 +145,29 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        // get the total length of the file
-        int word_counter = 0;
+        int word_counter = 0;                                // get the total length of the file
 
         while(fscanf(fp, "%s", raw_str) != EOF)
             word_counter++;
 
-        // set up muti-process
-        pid_t child_pid;
+        char *file;  //TODO
 
-        for (int i=0; i<argv[4]; i++) { // the fourth arg points out how many process we need (according to the project description)
-            int fragment_size = word_counter/(int)argv[4]; // get the fragment size for every child process
-            child_pid = fork(); // create new process
+        pid_t child_pid;                                    // set up multi-process
 
-            if (child_pid > 0) { // This is a parent process
+        for (int i=0; i<argv[4]; i++) {                     // the fourth arg points out how many process we need (according to the project description)
+
+            int fragment_size = word_counter/(int)argv[4];  // get the fragment size for every child process
+            child_pid = fork();                             // create new process
+
+            if (child_pid > 0) {                            // This is a PARENT process
 
                 // get all mini part from child process
                 // put them together
                 // sort it
 
             }
-            else if (child_pid == 0) { // This is a child process
-
+            else if (child_pid == 0) {                      // This is a CHILD process
+                char* fragment = ;
                 // get
             }
 
@@ -183,15 +175,13 @@ int main(int argc, char *argv[]) {
         }
 
 
-        // get the total runtime
-        gettimeofday(&end, NULL);
+
+        gettimeofday(&end, NULL);                           // get the total runtime
         long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
-        // print the result
-        print_result(argv[2], argv[3], runtime);
+        print_result(argv[2], argv[3], runtime);            // print the result
 
-        // close the file
-        fclose(fp);
+        fclose(fp);                                         // close the file
         printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
     }
     return 0;
