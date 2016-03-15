@@ -120,19 +120,19 @@ void print_result(char *result_filename, char *runtime_filename, long runtime){
 
 /* main function start here */
 int main(int argc, char *argv[]) {
-//    if ((argc == 2 && (argv[1] == "--help" || argv[1] == "-h")) || argc == 1){  // help
-//        printf("./wordc-mp input-textfile output-countfile output-runtime num-of-processes\n");
-//        return 0;
-//    }
-//    if (argc != 5){
-//        printf("Expected 4 arguments, given %d", argc-1);
-//        return -1;
-//    }
+/*TEMP:if ((argc == 2 && (argv[1] == "--help" || argv[1] == "-h")) || argc == 1){  // help
+        printf("./wordc-mp input-textfile output-countfile output-runtime num-of-processes\n");
+        exit(1);
+    }
+    if (argc != 5){
+        printf("Expected 4 arguments, given %d", argc-1);
+        exit(1);
+    }*/
 
     struct timeval start, end;                                         // set the start time
     gettimeofday(&start, NULL);
 
-    //FILE *fp = fopen(argv[1], "r");                                    // open the given file
+    //TEMP:FILE *fp = fopen(argv[1], "r");                             // open the given file
     FILE *fp = fopen("p.txt", "r");
     char *raw_str = (char *) malloc (128 * sizeof(char));
     if (fp == NULL) {                                                  // exit if failed to open file
@@ -148,39 +148,47 @@ int main(int argc, char *argv[]) {
         total_num_of_words++;
     }
 
-    //TODO: error, an array size must be assigned at the compile time
     pid_t pid;                                                         // set up multi-process
 
-    for (int i=0; i<(int)argv[4]; i++) {                               // the fourth arg points out how many process we need (according to the project description)
+    for (int i=1; i<=4; i++) {
+    //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
 
-        int fragment_size = total_num_of_words/(int)argv[4];           // get the fragment size for every child process
+        int partial_num_of_words = total_num_of_words/(int)argv[4];    // get the partial size for every child process
         pid = fork();                                                  // create new process
 
         if (pid > 0) {                                                 // This is a PARENT process
-            // sort the first 1/argv[4] of file
-            // get all sorted fragment from child process
-            // put them together
-            // sort it
-
+            for (int j=0; j<partial_num_of_words; j++) {               // parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
+                search_in_list(tokenized_file[j]);
+            }
         }
 
         else if (pid == 0) {                                           // This is a CHILD process
-            // char* fragment = file(from i/word_num to i*word_num);
-            // call the search_in_list(fragment);
-            // pipe the result to parent
+                                                                       // child sort rest part, which is tokenized_file[partial_num_of_words*i] - tokenized_file[partial_num_of_words*(i+1)]
+            for (int j=partial_num_of_words*i; j<partial_num_of_words*(i+1); j++) {
+                search_in_list(tokenized_file[j]);
+            }
+            // TODO: pipe the result to parent
         }
 
-        else printf("Failed to create new processes");
+        else {
+            printf("Failed to create new processes");
+            exit(1);
+        }
+    }
+
+    //while (wait()>0);                                                //TODO: Wait for all child process done its work
+    if(pid > 0){                                                       // This is a PARENT process
+        // TODO: get all SORTED fragments
+        // TODO: sort
     }
 
 
-
-    gettimeofday(&end, NULL);                           // get the total runtime
+    gettimeofday(&end, NULL);                                         // get the total runtime
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
-    //print_result(argv[2], argv[3], runtime);            // print the result
+    //TEMP:print_result(argv[2], argv[3], runtime);                   // print the result
 
-    fclose(fp);                                         // close the file
+    fclose(fp);                                                       // close the file
     printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
 
     return 0;
