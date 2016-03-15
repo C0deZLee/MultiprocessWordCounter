@@ -1,4 +1,4 @@
-wordc: wordc.c
-	gcc -o wordc wordc.c -std=c99
+wordc: wordc_mp.c
+	gcc -o wordc wordc_mp.c -std=c99
 clean:
-	rm -f wordc.c wordc
+	rm -f wordc_mp.c wordc

@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 	int fd[2];
 	char buffer[20];
 	int n, i, j, status;
-	int TotalNumberofWords
+	int TotalNumberofWords;
 
 	n = atoi(argv[1]);//number of children - 1
     pid_t pid[n];

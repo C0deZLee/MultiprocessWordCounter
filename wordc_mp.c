@@ -1,16 +1,10 @@
-//
-//
-//
-
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include <sys/time.h>
-#include <stdbool.h>
 
 /* structure definition */
 typedef struct word_count {
@@ -121,54 +115,56 @@ void print_result(char *result_filename, char *runtime_filename, long runtime){
 
     fp = fopen(runtime_filename, "w+");                                         // print the runtime into runtime_filename
     fprintf(fp,"The total runtime is %ld\n-------------------", runtime);
-    // close the file
-    fclose(fp);
+    fclose(fp);                                                                 // close the file
 }
 
 /* main function start here */
 int main(int argc, char *argv[]) {
-    if (argc != 5){
-        printf("Expected 4 arguments, given %d", argc-1);
-        return -1;
-    }
+//    if ((argc == 2 && (argv[1] == "--help" || argv[1] == "-h")) || argc == 1){  // help
+//        printf("./wordc-mp input-textfile output-countfile output-runtime num-of-processes\n");
+//        return 0;
+//    }
+//    if (argc != 5){
+//        printf("Expected 4 arguments, given %d", argc-1);
+//        return -1;
+//    }
 
-    struct timeval start, end;                                          // set the start time
+    struct timeval start, end;                                         // set the start time
     gettimeofday(&start, NULL);
 
-
-    char *raw_str = (char *) malloc (128 * sizeof(char)),              // read file
-            *formatted_str = (char *) malloc (128 * sizeof(char));
-    FILE *fp = fopen(argv[1], "r");
-
-    if (fp == NULL) {
+    //FILE *fp = fopen(argv[1], "r");                                    // open the given file
+    FILE *fp = fopen("p.txt", "r");
+    char *raw_str = (char *) malloc (128 * sizeof(char));
+    if (fp == NULL) {                                                  // exit if failed to open file
         perror("Failed to open file");
         exit(1);
     }
 
-    char *file = (char *) malloc (100000 * sizeof (char));  // set up a string to save the whole file
-    int word_num = 0;                                       // get the total length of the file
+    char **tokenized_file = (char **) malloc (100000 * sizeof (char *));// == string tokenized_file[100000] in C++
+    int total_num_of_words = 0;                                        // get the total length of the file
 
-    while(fscanf(fp, "%s", raw_str) != EOF) {               // save the file into string
-        file[word_num] = word_format(raw_str);
-        word_num++;
+    while(fscanf(fp, "%s", raw_str) != EOF) {                          // tokenize the file and save it to tokenized_file
+        tokenized_file[total_num_of_words] = word_format(raw_str);     // format the word
+        total_num_of_words++;
     }
 
-    pid_t child_pid;                                        // set up multi-process
+    //TODO: error, an array size must be assigned at the compile time
+    pid_t pid;                                                         // set up multi-process
 
-    for (int i=0; i<(int)argv[4]; i++) {                    // the fourth arg points out how many process we need (according to the project description)
+    for (int i=0; i<(int)argv[4]; i++) {                               // the fourth arg points out how many process we need (according to the project description)
 
-        int fragment_size = word_num/(int)argv[4];      // get the fragment size for every child process
-        child_pid = fork();                             // create new process
+        int fragment_size = total_num_of_words/(int)argv[4];           // get the fragment size for every child process
+        pid = fork();                                                  // create new process
 
-        if (child_pid > 0) {                            // This is a PARENT process
+        if (pid > 0) {                                                 // This is a PARENT process
             // sort the first 1/argv[4] of file
             // get all sorted fragment from child process
             // put them together
             // sort it
-            
+
         }
 
-        else if (child_pid == 0) {                      // This is a CHILD process
+        else if (pid == 0) {                                           // This is a CHILD process
             // char* fragment = file(from i/word_num to i*word_num);
             // call the search_in_list(fragment);
             // pipe the result to parent
@@ -182,7 +178,7 @@ int main(int argc, char *argv[]) {
     gettimeofday(&end, NULL);                           // get the total runtime
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
-    print_result(argv[2], argv[3], runtime);            // print the result
+    //print_result(argv[2], argv[3], runtime);            // print the result
 
     fclose(fp);                                         // close the file
     printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
