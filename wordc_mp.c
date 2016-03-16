@@ -151,8 +151,9 @@ int main(int argc, char *argv[]) {
     }
 
     pid_t pid;                                                         // set up multi-process
-    int *status,                                                       // the status automatically points to the exit position of child process
+    int status,                                                       // the status automatically points to the exit position of child process
         partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
+
 
     for (int i=1; i<=4; i++) {
     //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
@@ -161,14 +162,12 @@ int main(int argc, char *argv[]) {
 
         if (pid > 0) {                                                 // This is the PARENT process
             while (wait(&status)>0);                                   // first wait all children done their work
-            if(i == 4) {                                               // then parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
-                for (int j=0; j<partial_num_of_words; j++) {
+            if(i == 4) {                                               // wait until loop reached the last run
+                for (int j=0; j<partial_num_of_words; j++) {           // then parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
                     search_in_list(tokenized_file[j]);
                 }
                 printf("This is the PARENT process\n");
             }
-
-
         }
 
         else if (pid == 0) {                                           // This is a CHILD process
