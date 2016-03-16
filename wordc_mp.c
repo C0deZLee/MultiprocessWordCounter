@@ -152,7 +152,8 @@ int main(int argc, char *argv[]) {
 
     pid_t pid;                                                         // set up multi-process
     int status,                                                       // the status automatically points to the exit position of child process
-        partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
+      // TEMP:  partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
+        partial_num_of_words = total_num_of_words/4;        // get the partial size for every child process
 
 
     for (int i=1; i<=4; i++) {
