@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
     }
 
     pid_t pid;                                                         // set up multi-process
+	int status;                                                        // allocated space for status
 
     for (int i=1; i<=4; i++) {
     //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
@@ -177,8 +178,18 @@ int main(int argc, char *argv[]) {
     }
 
     //while (wait()>0);                                                //TODO: Wait for all child process done its work
+
     if(pid > 0){                                                       // This is a PARENT process
-        // TODO: get all SORTED fragments
+		/*
+		pid_t result = wait(&status);
+		if (result == -1){
+			perror("error");
+			return 1;
+		}
+		*/
+		while (wait(&status)>0);                                       //waits for all children. When it's successful, it returns the pid of the child. When it fails, it returns -1
+																	   //wait() also cleans up the zombies
+		// TODO: get all SORTED fragments
         // TODO: sort
     }
 
