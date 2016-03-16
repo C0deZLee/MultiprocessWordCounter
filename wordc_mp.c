@@ -135,14 +135,14 @@ int main(int argc, char *argv[]) {
     gettimeofday(&start, NULL);
 
     //TEMP:FILE *fp = fopen(argv[1], "r");                             // open the given file
-    FILE *fp = fopen("p.txt", "r");
+    FILE *fp = fopen("b.txt", "r");
     char *raw_str = (char *) malloc (128 * sizeof(char));
     if (fp == NULL) {                                                  // exit if failed to open file
         perror("Failed to open file");
         exit(1);
     }
 
-    char **tokenized_file = (char **) malloc (100000 * sizeof (char *));// == string tokenized_file[100000] in C++
+    char **tokenized_file = (char **) malloc (900000 * sizeof (char *));// == string tokenized_file[100000] in C++
     int total_num_of_words = 0;                                        // get the total length of the file
 
     while(fscanf(fp, "%s", raw_str) != EOF) {                          // tokenize the file and save it to tokenized_file
@@ -153,29 +153,15 @@ int main(int argc, char *argv[]) {
     pid_t pid;                                                         // set up multi-process
     int status,                                                       // the status automatically points to the exit position of child process
       // TEMP:  partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
-        partial_num_of_words = total_num_of_words/4;        // get the partial size for every child process
+        partial_num_of_words = total_num_of_words/15;        // get the partial size for every child process
 
 
-    for (int i=1; i<=4; i++) {
+    for (int i=1; i<=15; i++) {
     //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
 
         pid = fork();                                                  // create new process
 
-        if (pid > 0) {                                                 // This is the PARENT process
-            while (wait(&status)>0);                                   // first wait all children done their work
-            if(i == 4) {                                               // wait until loop reached the last run
-                for (int j=0; j<partial_num_of_words; j++) {           // then parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
-                    search_in_list(tokenized_file[j]);
-                }
-                printf("This is the PARENT process\n");
-                // TODO: get the result from child
-                // TODO: put them together
-                // TODO: sort
-                // TODO: print result
-            }
-        }
-
-        else if (pid == 0) {                                           // This is a CHILD process
+         if (pid == 0) {                                           // This is a CHILD process
                                                                        // child sort rest part, which is tokenized_file[partial_num_of_words*i] - tokenized_file[partial_num_of_words*(i+1)]
             for (int j=partial_num_of_words*i; j<partial_num_of_words*(i+1); j++) {
                 search_in_list(tokenized_file[j]);
@@ -185,19 +171,33 @@ int main(int argc, char *argv[]) {
             exit(0);                                                   // exit the child process since it done all work
         }
 
-        else {
+        else if (pid < 0) {
             printf("Failed to create new processes");
             exit(1);
         }
     }
 
+    if (pid > 0) {                                             // This is the PARENT process
+        for (int j=0; j<partial_num_of_words; j++) {           // first, parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
+            search_in_list(tokenized_file[j]);
+        }
+        while (wait(&status)>0);                               // then wait all children done their work
+        printf("This is the PARENT process\n");
+        // TODO: get the result from child
+        // TODO: put them together
+        // TODO: sort
+        // TODO: print result
+    }
+
+
     gettimeofday(&end, NULL);                                         // get the total runtime
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
-    //TEMP:print_result(argv[2], argv[3], runtime);                   // print the result
+    // TEMP:print_result(argv[2], argv[3], runtime);                   // print the result
 
-    fclose(fp);                                                       // close the file
-    //printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+    fclose(fp);                                                        // close the file
+    // printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+    printf("runtime %ld", runtime);
 
     return 0;
 }
