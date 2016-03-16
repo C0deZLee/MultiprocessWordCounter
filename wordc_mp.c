@@ -167,6 +167,10 @@ int main(int argc, char *argv[]) {
                     search_in_list(tokenized_file[j]);
                 }
                 printf("This is the PARENT process\n");
+                // TODO: get the result from child
+                // TODO: put them together
+                // TODO: sort
+                // TODO: print result
             }
         }
 
@@ -176,8 +180,8 @@ int main(int argc, char *argv[]) {
                 search_in_list(tokenized_file[j]);
             }
             printf("This is a CHILD process, %d \n",i);
-            exit(0);
             // TODO: pipe the result to parent
+            exit(0);                                                   // exit the child process since it done all work
         }
 
         else {
