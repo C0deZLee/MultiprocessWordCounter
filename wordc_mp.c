@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <sys/time.h>
+
 
 /* structure definition */
 typedef struct word_count {
@@ -149,17 +151,24 @@ int main(int argc, char *argv[]) {
     }
 
     pid_t pid;                                                         // set up multi-process
+    int *status,                                                       // the status automatically points to the exit position of child process
+        partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
 
     for (int i=1; i<=4; i++) {
     //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
 
-        int partial_num_of_words = total_num_of_words/(int)argv[4];    // get the partial size for every child process
         pid = fork();                                                  // create new process
 
-        if (pid > 0) {                                                 // This is a PARENT process
-            for (int j=0; j<partial_num_of_words; j++) {               // parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
-                search_in_list(tokenized_file[j]);
+        if (pid > 0) {                                                 // This is the PARENT process
+            while (wait(&status)>0);                                   // first wait all children done their work
+            if(i == 4) {                                               // then parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
+                for (int j=0; j<partial_num_of_words; j++) {
+                    search_in_list(tokenized_file[j]);
+                }
+                printf("This is the PARENT process\n");
             }
+
+
         }
 
         else if (pid == 0) {                                           // This is a CHILD process
@@ -167,6 +176,8 @@ int main(int argc, char *argv[]) {
             for (int j=partial_num_of_words*i; j<partial_num_of_words*(i+1); j++) {
                 search_in_list(tokenized_file[j]);
             }
+            printf("This is a CHILD process, %d \n",i);
+            exit(0);
             // TODO: pipe the result to parent
         }
 
@@ -176,20 +187,13 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //while (wait()>0);                                                //TODO: Wait for all child process done its work
-    if(pid > 0){                                                       // This is a PARENT process
-        // TODO: get all SORTED fragments
-        // TODO: sort
-    }
-
-
     gettimeofday(&end, NULL);                                         // get the total runtime
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
     //TEMP:print_result(argv[2], argv[3], runtime);                   // print the result
 
     fclose(fp);                                                       // close the file
-    printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+    //printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
 
     return 0;
 }
