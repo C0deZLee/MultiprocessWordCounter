@@ -136,12 +136,27 @@ int main(int argc, char *argv[]) {
 
     //TEMP:FILE *fp = fopen(argv[1], "r");                             // open the given file
     FILE *fp = fopen("b.txt", "r");
+
+	//This finds out the number of bytes in the file. size is the number of total bytes.
+
+	/*TEMP: fseek(argv[1], 0, SEEK_END);   // seek to end of file. Taken from http://stackoverflow.com/questions/238603/how-can-i-get-a-files-size-in-c
+	int size = ftell(argv[1]);             // get current file pointer
+	fseek(argv[1], 0, SEEK_SET);           // seek back to beginning of file
+	                                       // proceed with allocating memory and reading the file
+	*/
+	fseek("b.txt", 0, SEEK_END);            // seek to end of file. Taken from http://stackoverflow.com/questions/238603/how-can-i-get-a-files-size-in-c
+	int size = ftell("b.txt");              // get current file pointer
+	fseek("b.txt", 0, SEEK_SET);            // seek back to beginning of file
+	                                        // proceed with allocating memory and reading the file
+
+	//char *raw_str = (char *) malloc (sizeof(size));  //<--Could you test this?
     char *raw_str = (char *) malloc (128 * sizeof(char));
     if (fp == NULL) {                                                  // exit if failed to open file
         perror("Failed to open file");
         exit(1);
     }
 
+	// char **tokenized_file = (char **) malloc (sizeof (size)); //<--Would this be better?
     char **tokenized_file = (char **) malloc (900000 * sizeof (char *));// == string tokenized_file[100000] in C++
     int total_num_of_words = 0;                                        // get the total length of the file
 
@@ -155,21 +170,42 @@ int main(int argc, char *argv[]) {
       // TEMP:  partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
         partial_num_of_words = total_num_of_words/15;        // get the partial size for every child process
 
+	int fd[2][15];                              //fd = file descriptor. Every process gets one.
+	//TEMP: int fd[2][argv[4]];                //fd[0] is for reading. fd[1] is for writing.  
 
-    for (int i=1; i<=15; i++) {
-    //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
 
-        pid = fork();                                                  // create new process
+	for (int i = 1; i < (15 - 1); i++){ //Sets up pipes
+		pipe(fd + i);
+		}
+	/*TEMP: for (int i = 1; i < (argv[4] - 1); i++){ //Why argv[4] - 1? For n total processes, we need n-1 pipes
+		pipe(fd + i);
+	}*/
+	
 
-         if (pid == 0) {                                           // This is a CHILD process
-                                                                       // child sort rest part, which is tokenized_file[partial_num_of_words*i] - tokenized_file[partial_num_of_words*(i+1)]
-            for (int j=partial_num_of_words*i; j<partial_num_of_words*(i+1); j++) {
-                search_in_list(tokenized_file[j]);
-            }
-            printf("This is a CHILD process, %d \n",i);
-            // TODO: pipe the result to parent
-            exit(0);                                                   // exit the child process since it done all work
-        }
+
+	for (int i = 1; i <= 15; i++) {
+		//TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
+
+		pid = fork();                                                  // create new process
+
+		if (pid == 0) {                                           // This is a CHILD process
+			// child sort rest part, which is tokenized_file[partial_num_of_words*i] - tokenized_file[partial_num_of_words*(i+1)]
+			for (int j = partial_num_of_words*i; j < partial_num_of_words*(i + 1); j++) {
+				search_in_list(tokenized_file[j]);
+			}
+			printf("This is a CHILD process, %d \n", i);
+			// TODO: pipe the result to parent
+
+			write(fd[0][i], PartoftheSortedTextFile, size);//I don't know what to put for this
+			//The problem with this is it looks at the entire textfile and puts it into one pipe. We need to give parts of the textfile to different pipes
+			//write(fd[0][i], "b.txt", size);
+			//TEMP: write(fd[0][i], ..., size); //size is the bytes of the entire file.
+			//TODO: make size just the part of file
+			//places the characters read from file into buffer
+		
+
+		exit(0);                                                   // exit the child process since it done all work
+		}
 
         else if (pid < 0) {
             printf("Failed to create new processes");
@@ -184,6 +220,20 @@ int main(int argc, char *argv[]) {
         while (wait(&status)>0);                               // then wait all children done their work
         printf("This is the PARENT process\n");
         // TODO: get the result from child
+
+		//Is this too big? -Jesse
+		char buffer[100000]; //must be able to hold the number of words passed 
+
+		for (int i = 1; i <= 15; i++) {
+		//TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
+
+			read(fd[0][i],buffer,size); //size is the bytes of the entire file.
+			                            //TODO: make size just the part of file
+			                         //reads a number of bytes from the file associated with fd and places the characters read into buffer
+			                         //Returns the number of bytes read. Returns 0 at end-of-file
+
+
+		}
         // TODO: put them together
         // TODO: sort
         // TODO: print result
@@ -198,6 +248,10 @@ int main(int argc, char *argv[]) {
     fclose(fp);                                                        // close the file
     // printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
     printf("runtime %ld", runtime);
+
+	//Deallocates the allocations
+	free(raw_str); //I don't know if this will word -Jesse
+	free(*tokenized_file);
 
     return 0;
 }
