@@ -170,25 +170,19 @@ int main(int argc, char *argv[]) {
       // TEMP:  partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
         partial_num_of_words = total_num_of_words/15;        // get the partial size for every child process
 
-	int fd[2][15];                              //fd = file descriptor. Every process gets one.
+	int fd[2];
+	//int fd[2][15];                              //fd = file descriptor. Every process gets one.
 	//TEMP: int fd[2][argv[4]];                //fd[0] is for reading. fd[1] is for writing.  
-
-
-	for (int i = 1; i < (15 - 1); i++){ //Sets up pipes
-		pipe(fd + i);
-		}
-	/*TEMP: for (int i = 1; i < (argv[4] - 1); i++){ //Why argv[4] - 1? For n total processes, we need n-1 pipes
-		pipe(fd + i);
-	}*/
-	
 
 
 	for (int i = 1; i <= 15; i++) {
 		//TEMP:for (int i=1; i<=(int)argv[4]; i++) {                       // the 4th arg is number of processes
-
+		pipe(fd); //Sets up pipes
 		pid = fork();                                                  // create new process
 
 		if (pid == 0) {                                           // This is a CHILD process
+			close(fd[0]); //closes the read end of the child's pipe
+			
 			// child sort rest part, which is tokenized_file[partial_num_of_words*i] - tokenized_file[partial_num_of_words*(i+1)]
 			for (int j = partial_num_of_words*i; j < partial_num_of_words*(i + 1); j++) {
 				search_in_list(tokenized_file[j]);
@@ -196,7 +190,7 @@ int main(int argc, char *argv[]) {
 			printf("This is a CHILD process, %d \n", i);
 			// TODO: pipe the result to parent
 
-			write(fd[0][i], PartoftheSortedTextFile, size);//I don't know what to put for this
+			write(fd[1], PartoftheSortedTextFile, size);//I don't know what to put for this
 			//The problem with this is it looks at the entire textfile and puts it into one pipe. We need to give parts of the textfile to different pipes
 			//write(fd[0][i], "b.txt", size);
 			//TEMP: write(fd[0][i], ..., size); //size is the bytes of the entire file.
