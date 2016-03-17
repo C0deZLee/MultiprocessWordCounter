@@ -6,3 +6,12 @@
 .idea/Muti-process-Word-Counter.iml
 
 CMakeLists.txt
+*.log
+Debug/vc120.idb
+*.pdb
+*.suo
+Muti-process-Word-Counter.vcxproj
+*.vcxproj
+*.sln
+*.opensdf
+Muti-process-Word-Counter.sdf
