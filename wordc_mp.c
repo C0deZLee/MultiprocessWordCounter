@@ -156,10 +156,10 @@ int main(int argc, char *argv[]) {
     int total_num_of_words = 0,                                        // get the total length of the file
         status,                                                        // the status automatically points to the exit position of child process
         //TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
-        partial_num_of_words;
-        //fd[2][3];                                                    // fd = file descriptor. Every process gets one.
+        partial_num_of_words,
+        fd[2][3];                                                    // fd = file descriptor. Every process gets one.
         //TEMP: fd[2][argv[4]];                                        // fd[0] is for reading. fd[1] is for writing.
-        // ^^^ This WON'T work because the array size must be assigned at compile time
+        //Steve: ^^^ This WON'T work because the array size must be assigned at compile time
 
     pid_t pid;                                                         // set up multi-process
 
@@ -169,9 +169,9 @@ int main(int argc, char *argv[]) {
         total_num_of_words++;                                          // get the number of total words in file
     }
     partial_num_of_words = total_num_of_words/3;
-	//for (int i = 1; i <= (3); i++) {                                   // sets up pipes
-	//	pipe(fd + i); // What's this for? fd is a pointer
-	//	}
+	for (int i = 1; i <= (3); i++) {                                 // sets up pipes
+		pipe(fd + i);                  //Steve: What's this for? fd is a pointer.. and this line of code caused a SIGNAL ABORT ERROR.. idk why
+		}
 	/*TEMP: for (int i = 1; i < (argv[4] - 1); i++){                   //Why argv[4] - 1? For n total processes, we need n-1 pipes
 		pipe(fd + i);
 	}*/
