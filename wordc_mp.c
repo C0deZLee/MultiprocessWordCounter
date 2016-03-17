@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
             status,                                                        // the status automatically points to the exit position of child process
     //TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
             partial_num_of_words,
-            fd[2][3];                                                    // fd = file descriptor. Every process gets one.
+            fd[2];                                                    // fd = file descriptor. Every process gets one.
     //TEMP: fd[2][argv[4]];                                        // fd[0] is for reading. fd[1] is for writing.
     //Steve: ^^^ This WON'T work because the array size must be assigned at compile time
 
@@ -169,17 +169,13 @@ int main(int argc, char *argv[]) {
         total_num_of_words++;                                          // get the number of total words in file
     }
     partial_num_of_words = total_num_of_words/3;
-    for (int i = 1; i <= (3); i++) {                                 // sets up pipes
-        pipe(fd + i);                  //Steve: What's this for? fd is a pointer.. and this line of code caused a SIGNAL ABORT ERROR.. idk why
-    }
-    /*TEMP: for (int i = 1; i < (argv[4] - 1); i++){                   //Why argv[4] - 1? For n total processes, we need n-1 pipes
-        pipe(fd + i);
-    }*/
+
 
 
     for (int i = 1; i <= 3; i++) {
         //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-        pid = fork();                                                  // create new process
+		pipe(fd);
+		pid = fork();                                                  // create new process
 
         if (pid == 0) {                                                // This is a CHILD process
             for (int j = partial_num_of_words*i; j < partial_num_of_words*(i + 1); j++) {
@@ -191,11 +187,7 @@ int main(int argc, char *argv[]) {
             //        you can access the linked list by HEAD->next, HEAD->word
             //        one possiable solution is send the HEAD pointer through pipe
 
-            // write(fd[0][i], PartoftheSortedTextFile, size); //I don't know what to put for this
-            // The problem with this is it looks at the entire textfile and puts it into one pipe. We need to give parts of the textfile to different pipes
-            // write(fd[0][i], "b.txt", size);
-            // TEMP: write(fd[0][i], ..., size); //size is the bytes of the entire file.
-            // TODO: make size just the part of file
+             write(fd[0], HEAD , sizeof(HEAD)); 
             // places the characters read from file into buffer
 
             exit(0);                                                   // exit the child process since it done all work
@@ -216,11 +208,11 @@ int main(int argc, char *argv[]) {
         // TODO: get the result from child
 
         //Is this too big? -Jesse A: the largest file has about 140,000 words, you can consider that....
-        char buffer[100000];                                           //must be able to hold the number of words passed
+		char buffer[sizeof(HEAD)];                                           //must be able to hold the number of words passed
 
         for (int i = 1; i <= 3; i++) {
             //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-            //read(fd[0][i],buffer,size); //size is the bytes of the entire file.
+			read(fd[0], buffer, sizeof(HEAD)); //size is the bytes of the entire file.
             //TODO: make size just the part of file
             //TODO: reads a number of bytes from the file associated with fd and places the characters read into buffer
             //TODO: Returns the number of bytes read. Returns 0 at end-of-file
