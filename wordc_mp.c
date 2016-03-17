@@ -155,7 +155,6 @@ int main(int argc, char *argv[]) {
       // TEMP:  partial_num_of_words = total_num_of_words/(int)argv[4];        // get the partial size for every child process
         partial_num_of_words = total_num_of_words/15;        // get the partial size for every child process
 
-
 	int fd[2];
 	//int fd[2][15];                              //fd = file descriptor. Every process gets one.
 	//TEMP: int fd[2][argv[4]];                //fd[0] is for reading. fd[1] is for writing.  
