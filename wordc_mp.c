@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));//Allocates space for 4 pointers
 	for (int i = 0; i < 4 - 1; i++)
 	{
-		fd[i] = (int*)malloc(sizeof(int));//2?
+		fd[i] = (int*)malloc(2*sizeof(int));
 		pipe(fd[i]);
 	}
 	/*
