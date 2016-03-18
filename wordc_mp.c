@@ -187,8 +187,11 @@ int main(int argc, char *argv[]) {
             //        you can access the linked list by HEAD->next, HEAD->word
             //        one possiable solution is send the HEAD pointer through pipe
 
-             write(fd[0], HEAD , sizeof(HEAD)); 
-            // places the characters read from file into buffer
+             
+			 for (struct word_count *curr = HEAD; curr->next != NULL; curr = curr->next){
+				write(fd[0], curr , sizeof(curr)); 
+					// places the characters read from file into buffer
+			 }
 
             exit(0);                                                   // exit the child process since it done all work
         }
