@@ -237,16 +237,22 @@ int main(int argc, char *argv[]) {
         while (wait(&status)>0);                                       // then wait all children done their work
         printf("This is the PARENT process\n");
         // TODO: get the result from child
-
-		char buffer[sizeof(HEAD)];                                           //must be able to hold the nodes passed
+		int bytesRead;
+		char buffer[10000*sizeof(HEAD)];                   //must be able to hold the nodes passed
 		close(fd[1][0]); //close write end of parent
         for (int i = 1; i <= 3; i++) {
 			//read itself is blocking
             //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-			if(read(fd[0][0], buffer, sizeof(HEAD))==0) //size is the bytes of the file.
-			add_to_list(buffer);
-            //reads a number of bytes from the file associated with fd and places the characters read into buffer
-
+			if ((bytesRead = read(fd[0][0], buffer, strlen(buffer))) >= 0){ //size is the bytes of the file.
+				//read returns the number of bytes read. It returns 0 at end-of-file
+				char word, number;
+				word = buffer[0];
+				number = buffer[1];
+				word_count newWord;
+				newWord->w
+					add_to_list(newWord);
+				//reads a number of bytes from the file associated with fd and places the characters read into buffer
+			}
         }
 		close(fd[0][0]); //close read end of parent
         // TODO: put them together
