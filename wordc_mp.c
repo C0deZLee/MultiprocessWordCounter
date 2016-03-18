@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 
 	int **fd;//this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
 
-	fd = (int**)malloc(3 * sizeof(int*));//Allocates space for 4 pointers
+	fd = (int**)malloc(4 * sizeof(int*));//Allocates space for 4 pointers
 
 	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));//Allocates space for 4 pointers
 
