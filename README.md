@@ -37,14 +37,13 @@ This program is written in C.
 	* Arabian nights:  ms
 
 ## Sources used 
-The links from google and StackOverflow we used are listed below:
+The links from the internet and StackOverflow we used:
 
 * http://www.gdsw.at/languages/c/programming-bbrown/c_075.htm
 * https://www.cs.rutgers.edu/~pxk/416/notes/c-tutorials/pipe.html
-* 
-* 
-* 
-* 
+* http://stackoverflow.com/questions/2279379/how-to-convert-integer-to-char-in-c
+* http://codewiki.wikidot.com/c:system-calls:read
+* http://stackoverflow.com/questions/238603/how-can-i-get-a-files-size-in-c
 
 ## Usage
 For C:
