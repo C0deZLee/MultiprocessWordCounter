@@ -153,13 +153,23 @@ int main(int argc, char *argv[]) {
     char *raw_str = (char *) malloc (128 * sizeof(char)),              // save the unformatted word
             **tokenized_file = (char **) malloc (size * sizeof(char*));   //<--Would this be better? A: yes, it is! and btw this is the right format
 
-    int total_num_of_words = 0,                                        // get the total length of the file
-            status,                                                        // the status automatically points to the exit position of child process
-    //TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
-            partial_num_of_words,
-            fd[2];                                                    // fd = file descriptor. Every process gets one.
-    //TEMP: fd[2][argv[4]];                                        // fd[0] is for reading. fd[1] is for writing.
-    //Steve: ^^^ This WON'T work because the array size must be assigned at compile time
+	int total_num_of_words = 0,                                        // get the total length of the file
+		status,                                                        // the status automatically points to the exit position of child process
+		//TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
+		partial_num_of_words;
+	int **fd;
+	fd = (int**)malloc(4 * sizeof(int*));
+	for (int i = 0; i < 4 - 1; i++)
+	{
+		fd[i] = (int*)malloc(2 * sizeof(int));
+		pipe(fd[i]);
+	}
+	/*
+	TEMP: for (int i = 0; i < argv[4]; i++)
+	{
+		fd[i] = (int*)malloc(2 * sizeof(int));
+		pipe(fd[i]);
+	}*/
 
     pid_t pid;                                                         // set up multi-process
 
@@ -174,7 +184,6 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i <= 3; i++) {
         //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-		pipe(fd);
 		pid = fork();                                                  // create new process
 
         if (pid == 0) {                                                // This is a CHILD process
@@ -183,15 +192,22 @@ int main(int argc, char *argv[]) {
             }
             printf("This is a CHILD process, %d \n", i);
             // TODO: pipe the result to parent
+			close(fd[0][i]); //close read end
             // Steve: the sorted list is not a file, it is a linked list, and each process has one (they are independent),
             //        you can access the linked list by HEAD->next, HEAD->word
-            //        one possiable solution is send the HEAD pointer through pipe
+            //        one possible solution is send the HEAD pointer through pipe
 
-             
 			 for (struct word_count *curr = HEAD; curr->next != NULL; curr = curr->next){
-				write(fd[0], curr , sizeof(curr)); 
-					// places the characters read from file into buffer
+				write(fd[1][i-1], curr , sizeof(curr)); 
 			 }
+			
+			 /*
+			 char num[-];//converts the int to char
+			 sprintf(num, "%d", p->count);
+			 write(fd, p->word, strlen(p->word));//sends word
+			 write(fd, num, strlen(num));//sends number */
+			 close(fd[1][i]); //close write end
+				 //when read looks like word1\0 5\0 so read stops every time when it hits null
 
             exit(0);                                                   // exit the child process since it done all work
         }
@@ -206,21 +222,22 @@ int main(int argc, char *argv[]) {
         for (int j=0; j<partial_num_of_words; j++) {                   // first, parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
             search_in_list(tokenized_file[j]);
         }
+
         while (wait(&status)>0);                                       // then wait all children done their work
         printf("This is the PARENT process\n");
         // TODO: get the result from child
 
-        //Is this too big? -Jesse A: the largest file has about 140,000 words, you can consider that....
-		char buffer[sizeof(HEAD)];                                           //must be able to hold the number of words passed
-
+		char buffer[sizeof(HEAD)];                                           //must be able to hold the nodes passed
+		close(fd[1][0]); //close write end of parent
         for (int i = 1; i <= 3; i++) {
+			//read itself is blocking
             //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-			read(fd[0], buffer, sizeof(HEAD)); //size is the bytes of the entire file.
-            //TODO: make size just the part of file
-            //TODO: reads a number of bytes from the file associated with fd and places the characters read into buffer
-            //TODO: Returns the number of bytes read. Returns 0 at end-of-file
+			if(read(fd[0][0], buffer, sizeof(HEAD))==0) //size is the bytes of the file.
+			add_to_list(buffer);
+            //reads a number of bytes from the file associated with fd and places the characters read into buffer
 
         }
+		close(fd[0][0]); //close read end of parent
         // TODO: put them together
         // TODO: sort
         // TODO: print result
