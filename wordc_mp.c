@@ -200,15 +200,23 @@ int main(int argc, char *argv[]) {
             //        you can access the linked list by HEAD->next, HEAD->word
             //        one possible solution is send the HEAD pointer through pipe
 
+			/*
 			 for (struct word_count *curr = HEAD; curr->next != NULL; curr = curr->next){
 				write(fd[1][i-1], curr , sizeof(curr)); 
 			 }
-			
-			 /*
-			 char num[-];//converts the int to char
-			 sprintf(num, "%d", p->count);
-			 write(fd, p->word, strlen(p->word));//sends word
-			 write(fd, num, strlen(num));//sends number */
+			*/
+			 
+			for (struct word_count *curr = HEAD; curr->next != NULL; curr = curr->next){
+				char num[70] = curr->count + '0';    //By adding '0' a number becomes a char http://stackoverflow.com/questions/2279379/how-to-convert-integer-to-char-in-c
+				                                     //There should be no number with more than 70 digits
+				/*char *num;
+				sprintf(num, "%d", curr->count);//takes count, makes into a char, sends it to num
+				This is just another way to make int into char*/
+
+				write(fd[0][i], curr->word, strlen(curr->word));      //sends word
+				write(fd[0][i], num, strlen(num));                    //sends number
+			}
+			 
 			 close(fd[1][i]); //close write end
 				 //when read looks like word1\0 5\0 so read stops every time when it hits null
 
