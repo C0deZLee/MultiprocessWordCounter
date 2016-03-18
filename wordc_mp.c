@@ -19,7 +19,7 @@ typedef struct word_count {
 /* Global variable */
 word_count *HEAD = NULL;
 word_count *TAIL = NULL;
-int TEMP_CHILD_NUM = 4;
+int TOTAL_PROCESS_NUM = 4;
 
 /* reate a new list if we don't have a list */
 int create_list(char *val) {
@@ -160,11 +160,11 @@ int main(int argc, char *argv[]) {
 
 	int **fd;//this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
 
-	fd = (int**)malloc(4 * sizeof(int*));//Allocates space for 4 pointers
+	fd = (int**)malloc(TOTAL_PROCESS_NUM * sizeof(int*));//Allocates space for TOTAL_PROCESS_NUM pointers
 
 	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));//Allocates space for 4 pointers
 
-	for (int i = 0; i < 4 - 1; i++) {
+	for (int i = 0; i < TOTAL_PROCESS_NUM - 1; i++) {
 		fd[i] = (int*)malloc(2 * sizeof(int));
 		pipe(fd[i]);
 	}
@@ -183,12 +183,12 @@ int main(int argc, char *argv[]) {
         tokenized_file[total_num_of_words] = word_format(raw_str);     // format the word
         total_num_of_words++;                                          // get the number of total words in file
     }
-    partial_num_of_words = total_num_of_words/3;
+	partial_num_of_words = total_num_of_words / TOTAL_PROCESS_NUM;
+	//TEMP: partial_num_of_words = total_num_of_words / (int)argv[4];
 
 
-
-    for (int i = 1; i <= 3; i++) {
-        //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
+	for (int i = 1; i <= TOTAL_PROCESS_NUM - 1; i++) { //the number of children is TOTAL_PROCESS_NUM - 1
+        //TEMP:for (int i=1; i<=(int)argv[4] -1; i++) {                   // the 4th arg is number of processes
 		pid = fork();                                                  // create new process
 
         if (pid == 0) {                                                // This is a CHILD process
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
 		int bytesRead;
 		char buffer[10000*sizeof(HEAD)];                   //must be able to hold the nodes passed
 		close(fd[1][0]); //close write end of parent
-        for (int i = 1; i <= 3; i++) {
+		for (int i = 1; i <= TOTAL_PROCESS_NUM - 1; i++) {
 			//read itself is blocking
             //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
 			if ((bytesRead = read(fd[0][0], buffer, strlen(buffer))) >= 0){ //size is the bytes of the file.
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
     //free(raw_str);                                                   // Deallocates the allocations
     //free(*tokenized_file);                                           // caused crash for some reason
 	/*
-	TEMP: for (int i = 0; i < argv[4]; i++)
+	TEMP: for (int i = 0; i < argv[4] - 1; i++)
 	{
 	free(fd[i]) 
 	}*/
