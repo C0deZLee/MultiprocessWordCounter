@@ -55,7 +55,7 @@ int add_to_list(char *val) {
         }
 
         if(strcmp (curr->word, search->word)>0 &&
-           (search->next == NULL || strcmp(curr->word, search->next->word)<0)){  // put behind
+           (search->next == NULL || strcmp(curr->word, search->next->word)<0)){       // put behind
             curr->next = search->next;
             curr->last = search;
             if(search->next != NULL) {
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
     fseek(fp, 0L, SEEK_SET);                                           // seek back to beginning of file
 
     char *raw_str = (char *) malloc (128 * sizeof(char)),              // save the unformatted word
-            **tokenized_file = (char **) malloc (size * sizeof(char*));   //<--Would this be better? A: yes, it is! and btw this is the right format
+         **tokenized_file = (char **) malloc (size * sizeof(char*));   // save the file into a string array
 
 	int total_num_of_words = 0,                                        // get the total length of the file
 		status,                                                        // the status automatically points to the exit position of child process
@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) {
 		fd[i] = (int*)malloc(2 * sizeof(int));
 		pipe(fd[i]);
 	}*/
+
 
     pid_t pid;                                                         // set up multi-process
 
@@ -219,7 +220,6 @@ int main(int argc, char *argv[]) {
 			 
 			 close(fd[1][i]); //close write end
 				 //when read looks like word1\0 5\0 so read stops every time when it hits null
-
             exit(0);                                                   // exit the child process since it done all work
         }
 
