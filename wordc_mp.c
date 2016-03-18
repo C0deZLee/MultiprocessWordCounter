@@ -249,8 +249,9 @@ int main(int argc, char *argv[]) {
 				word = buffer[0];
 				number = buffer[1];
 				word_count newWord;
-				newWord->w
-					add_to_list(newWord);
+				newWord->word = word;
+				newWord->count = number;//change back to int
+				add_to_list(newWord);
 				//reads a number of bytes from the file associated with fd and places the characters read into buffer
 			}
         }
