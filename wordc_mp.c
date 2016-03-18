@@ -19,6 +19,7 @@ typedef struct word_count {
 /* Global variable */
 word_count *HEAD = NULL;
 word_count *TAIL = NULL;
+int TEMP_CHILD_NUM = 4;
 
 /* reate a new list if we don't have a list */
 int create_list(char *val) {
@@ -155,16 +156,15 @@ int main(int argc, char *argv[]) {
 
 	int total_num_of_words = 0,                                        // get the total length of the file
 		status,                                                        // the status automatically points to the exit position of child process
-		//TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
-		partial_num_of_words;
+		partial_num_of_words;                                          // get the partial size for every child process
 
 	int **fd;//this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
 
-	fd = (int**)malloc(4 * sizeof(int*));//Allocates space for 4 pointers
+	fd = (int**)malloc(3 * sizeof(int*));//Allocates space for 4 pointers
+
 	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));//Allocates space for 4 pointers
-	for (int i = 0; i < 4 - 1; i++)
-	{
-		fd[i] = (int*)malloc(sizeof(int));//2?
+	for (int i = 0; i < 4 - 1; i++) {
+		fd[i] = (int*)malloc(2 * sizeof(int));
 		pipe(fd[i]);
 	}
 	/*
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
 			*/
 			 
 			for (struct word_count *curr = HEAD; curr->next != NULL; curr = curr->next){
-				char num[70] = curr->count + '0';    //By adding '0' a number becomes a char http://stackoverflow.com/questions/2279379/how-to-convert-integer-to-char-in-c
+				char *num = (char *) (curr->count + '0');    //By adding '0' a number becomes a char http://stackoverflow.com/questions/2279379/how-to-convert-integer-to-char-in-c
 				                                     //There should be no number with more than 70 digits
 				/*char *num;
 				sprintf(num, "%d", curr->count);//takes count, makes into a char, sends it to num
@@ -248,9 +248,9 @@ int main(int argc, char *argv[]) {
 				char word, number;
 				word = buffer[0];
 				number = buffer[1];
-				word_count newWord;
-				newWord->word = word;
-				newWord->count = number;//change back to int
+				struct word_count *newWord = (word_count*) malloc (sizeof(word_count));
+				newWord->word = (char *) word;
+				newWord->count = (int) number-'0';//change back to int
 				add_to_list(newWord);
 				//reads a number of bytes from the file associated with fd and places the characters read into buffer
 			}
