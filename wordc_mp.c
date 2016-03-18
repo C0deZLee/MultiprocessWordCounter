@@ -157,11 +157,14 @@ int main(int argc, char *argv[]) {
 		status,                                                        // the status automatically points to the exit position of child process
 		//TEMP: partial_num_of_words = total_num_of_words/(int)argv[4];// get the partial size for every child process
 		partial_num_of_words;
-	int **fd;
-	fd = (int**)malloc(4 * sizeof(int*));
+
+	int **fd;//this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
+
+	fd = (int**)malloc(4 * sizeof(int*));//Allocates space for 4 pointers
+	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));//Allocates space for 4 pointers
 	for (int i = 0; i < 4 - 1; i++)
 	{
-		fd[i] = (int*)malloc(2 * sizeof(int));
+		fd[i] = (int*)malloc(sizeof(int));//2?
 		pipe(fd[i]);
 	}
 	/*
@@ -253,8 +256,14 @@ int main(int argc, char *argv[]) {
     //TEMP: printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
     printf("runtime %ld", runtime);
 
-    //free(raw_str); //I don't know if this will work -Jesse           // Deallocates the allocations
+    //free(raw_str);                                                   // Deallocates the allocations
     //free(*tokenized_file);                                           // caused crash for some reason
+	/*
+	TEMP: for (int i = 0; i < argv[4]; i++)
+	{
+	free(fd[i]) 
+	}*/
+	//free(*fd);
 
     return 0;
 }
