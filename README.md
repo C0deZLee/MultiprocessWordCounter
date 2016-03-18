@@ -10,6 +10,7 @@ This program is written in C.
 
 ## Difficulties: 
 * We were not very familiar with pipes. Learning more about pipes, read(), write(), and file descriptors took a lot of time.  
+* Some times the free() function caused errors and we don't know why. 
 
 ##System calls/Library functions
 * stdio.h
