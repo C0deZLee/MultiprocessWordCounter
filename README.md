@@ -31,7 +31,15 @@ This program is written in C.
   * Pangur Ban:  ms
   * Hamlet:  ms
   * Arabian nights:  ms
-* For wordc-mp
+* For wordc-mp n = 2
+	* Pangur Ban:  ms
+	* Hamlet: 	ms
+	* Arabian nights:  ms
+* For wordc-mp n = 4
+	* Pangur Ban:  ms
+	* Hamlet: 	ms
+	* Arabian nights:  ms
+* For wordc-mp n = 8
 	* Pangur Ban:  ms
 	* Hamlet: 	ms
 	* Arabian nights:  ms
