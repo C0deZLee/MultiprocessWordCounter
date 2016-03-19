@@ -9,39 +9,39 @@ This program is written in C.
 *	It uses a linked list of structures to organize words. The main function tokenizes the words in the file and counts them with functions. The parent process creates the children and the tokens are divided equally among the number of processes. Once the children are done with the tokens, they use pipes to transfer the word and word count seperately to the parent.  
 
 ## Difficulties: 
-* We were not very familiar with pipes. Learning more about pipes, read(), write(), and file descriptors took a lot of time.  
+* We were not very familiar with pipes. Learning more about pipes, read(), write(), and file descriptors took a lot of time. 
+* It took some time to realize that for file descriptors, you would need something similar to a 2D array. And that it should be like fd[number of processes][0 or 1] instead of fd[0 or 1][number of processes].
+* For read(), Steve had a difficult time finding the buffer was too small for taking data from the pipe.
 * Some times the free() function caused errors and we don't know why. 
 
 ##System calls/Library functions
 * stdio.h
 * stdlib.h
-* signal.h
-* sys/wait.h
+* sys/types.h
 * ctype.h
 * string.h
 * unistd.h
 * sys/time.h
 
-
 ##Interesting design choices
-* We had the pipe pass the words and word counts from linked lists. A linked list of structures was easier to organize compared with passing a file. 
+* We used a linked list of structures to hold the words and word count. Since project 1 used linked lists, we knew how to count and sort the words. It was easier to organize compared with passing aaround a file. 
 
 ## Performance results:
-* For wordc, the average runtime on my computer is
-  * Pangur Ban:  ms
-  * Hamlet:  ms
-  * Arabian nights:  ms
+* For wordc, the average runtime (from previous project) on my computer is
+  * Pangur Ban:     212.39 ms
+  * Hamlet:         560584.37 ms
+  * Arabian nights:  28229117.71 ms
 * For wordc-mp n = 2
-	* Pangur Ban:  ms
-	* Hamlet: 	ms
+	* Pangur Ban:      ms
+	* Hamlet:          ms
 	* Arabian nights:  ms
 * For wordc-mp n = 4
-	* Pangur Ban:  ms
-	* Hamlet: 	ms
+	* Pangur Ban:      ms
+	* Hamlet: 	   ms
 	* Arabian nights:  ms
 * For wordc-mp n = 8
-	* Pangur Ban:  ms
-	* Hamlet: 	ms
+	* Pangur Ban:      ms
+	* Hamlet: 	   ms
 	* Arabian nights:  ms
 
 ## Sources used 
