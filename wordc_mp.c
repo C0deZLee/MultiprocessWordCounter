@@ -21,7 +21,7 @@ typedef struct word_count {
 /* Global variable */
 word_count *HEAD = NULL;
 word_count *TAIL = NULL;
-int TOTAL_PROCESS_NUM = 8;
+int argv[4] = 8;
 
 /* reate a new list if we don't have a list */
 int create_list(char *val) {
@@ -40,10 +40,10 @@ int add_to_list(char *val) {
         return (create_list(val));
 
     struct word_count *s_val = (word_count*) malloc (sizeof(word_count));
-    s_val->word = val, s_val->count = 1, s_val->last = NULL, s_val->next = NULL;        // create new struct
+    s_val->word = val, s_val->count = 1, s_val->last = NULL, s_val->next = NULL;      // create new struct
 
-    for(struct word_count *curr=HEAD; curr!=NULL; curr=curr->next) {                    // start at the first element
-        if (strcmp (s_val->word, curr->word) < 0) {                                     // s_val<curr, insert front
+    for(struct word_count *curr=HEAD; curr!=NULL; curr=curr->next) {                  // start at the first element
+        if (strcmp (s_val->word, curr->word) < 0) {                                   // s_val<curr, insert front
             s_val->next = curr;
             s_val->last = curr->last;
             if(curr->last != NULL) {
@@ -96,10 +96,10 @@ int search_in_list(char *val) {
 int merge_list(word_count *s_val) {
     if (s_val->count != -1) {
         for (struct word_count *curr = HEAD; curr != NULL; curr = curr->next) {
-            if (strcmp(s_val->word, curr->word) == 0) {                          // val == curr
+            if (strcmp(s_val->word, curr->word) == 0) {                     // val == curr
                 curr->count += s_val->count;
             }
-            else if (strcmp(s_val->word, curr->word) < 0) {                     // val < curr
+            else if (strcmp(s_val->word, curr->word) < 0) {                 // val < curr
                 s_val->next = curr;
                 s_val->last = curr->last;
                 if (curr->last != NULL) {
@@ -138,9 +138,10 @@ char *word_format(char *raw_str) {
     char *formatted = (char *) malloc(strlen(raw_str)+1), *final = formatted;
 
     while (*raw_str) {
-        if (ispunct(*raw_str))                                           // skip it
+        if (ispunct(*raw_str))                                          // skip it
             raw_str++;
-        else *formatted++ = (char) (isupper(*raw_str) ? tolower(*raw_str++) : *raw_str++);// increment both pointers and copying
+        else *formatted++ = (char) (isupper(*raw_str) ? tolower(*raw_str++) : *raw_str++);
+                                                                        // increment both pointers and copying
     }
     return final;
 }
@@ -161,19 +162,18 @@ void print_result(char *result_filename, char *runtime_filename, long runtime, c
 
 /* main function start here */
 int main(int argc, char *argv[]) {
-    if ((argc == 2 && (argv[1] == "--help" || argv[1] == "-h")) || argc == 1){  // help
-        printf("./wordc-mp input-textfile output-countfile output-runtime num-of-processes\n");
-        exit(1);
-    }
     if (argc != 5){
-        printf("Expected 4 arguments, given %d", argc-1);
+        if ((argc == 2 && (argv[1] == "--help" || argv[1] == "-h")) || argc == 1)  // help
+            printf("./wordc-mp input-textfile output-countfile output-runtime num-of-processes\n");
+        else
+            printf("Expected 4 arguments, given %d", argc-1);
         exit(1);
     }
 
     struct timeval start, end;                                         // set the start time
     gettimeofday(&start, NULL);
 
-    FILE *fp = fopen(argv[1], "r");                             // open the given file
+    FILE *fp = fopen(argv[1], "r");                                    // open the given file
     if (fp == NULL) {                                                  // exit if failed to open file
         perror("Failed to open file");
         exit(1);
@@ -189,9 +189,9 @@ int main(int argc, char *argv[]) {
 	int total_num_of_words = 0;                                        // get the total length of the file
 
 	int **fd;                                                          // this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
-    fd = (int**)malloc(TOTAL_PROCESS_NUM * sizeof(int*));              // allocates space for needed pointers
+    fd = (int**)malloc((int)argv[4] * sizeof(int*));                   // allocates space for needed pointers
 
-	for (int i = 0; i < TOTAL_PROCESS_NUM; i++) {                      // create pipe from 0 to TOTAL_PROCESS_NUM-1
+	for (int i = 0; i < (int)argv[4]; i++) {                           // create pipe from 0 to argv[4]-1
 		fd[i] = (int*)malloc(2 * sizeof(int));
 		pipe(fd[i]);
 	}
@@ -202,9 +202,9 @@ int main(int argc, char *argv[]) {
         tokenized_file[total_num_of_words] = word_format(raw_str);     // format the word
         total_num_of_words++;                                          // get the number of total words in file
     }
-    int partial_num_of_words = total_num_of_words / TOTAL_PROCESS_NUM;
+    int partial_num_of_words = total_num_of_words / (int) argv[4];     // get the number of word for every child process
 
-	for (int i = 1; i < TOTAL_PROCESS_NUM; i++) {                      //the number of children is 1 to TOTAL_PROCESS_NUM-1
+	for (int i = 1; i < (int)argv[4]; i++) {                           //the number of children is 1 to argv[4]-1
 		pid = fork();                                                  // create new process
         if (pid == 0) {                                                // This is a CHILD process
             close(fd[i][0]);                                           // close read end (no need)
@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
 
     struct word_count *buffer = (word_count *) malloc (sizeof(word_count));
     close(fd[0][1]);                                                  // close write end of parent
-    for (int i = 1; i < TOTAL_PROCESS_NUM; i++) {                     // child process is 1 to total-1
+    for (int i = 1; i < (int)argv[4]; i++) {                          // child process is 1 to total-1
         read(fd[i][0], buffer, 1000);
 
         while(buffer->count != -1){
