@@ -37,11 +37,11 @@ This program is written in C.
 * For wordc-mp n = 4
 	* Pangur Ban:   971  ms
 	* Hamlet: 111883 ms
-	* Arabian nights:  ms
+	* Arabian nights: 91535573.41 ms
 * For wordc-mp n = 8
 	* Pangur Ban:  1494.25    ms
 	* Hamlet: 84051  ms
-	* Arabian nights:  ms
+	* Arabian nights: 65496590.6 ms
 
 For wordc-mp n = 2, it was faster. For n=4, it was closer to the speed of wordc. But for n=8, it was slower. 
 
