@@ -249,19 +249,19 @@ int main(int argc, char *argv[]) {
     struct word_count *buffer = (word_count *) malloc (sizeof(word_count));
     close(fd[0][1]);                                                  // close write end of parent
     for (int i = 1; i < TOTAL_PROCESS_NUM; i++) {                     // child process is 1 to total-1
-        read(fd[i][0], buffer, 1000);
+        read(fd[i][0], buffer, 1000);                                 // read the pipe
 
         while(buffer->count != -1){
-            buffer->last = NULL, buffer->next = NULL;
-            merge_list(buffer);
-            read(fd[i][0], buffer, 1000);
+            buffer->last = NULL, buffer->next = NULL;                 // modify the pointer
+            merge_list(buffer);                                       // merge to main
+            read(fd[i][0], buffer, 1000);                             // read the pipe again
         }
     }
 
-    HEAD=NULL, TAIL=NULL;                                              // free the pointer
-    close(fd[0][0]);                                                   // close read end of parent
+    HEAD=NULL, TAIL=NULL;                                             // free the pointer
+    close(fd[0][0]);                                                  // close read end of parent
 
-    gettimeofday(&end, NULL);                                          // get the total runtime
+    gettimeofday(&end, NULL);                                         // get the total runtime
 
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
     printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
