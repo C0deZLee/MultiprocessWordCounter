@@ -27,22 +27,24 @@ This program is written in C.
 * We used a linked list of structures to hold the words and word count. Since project 1 used linked lists, we knew how to count and sort the words. It was easier to organize compared with passing aaround a file. 
 
 ## Performance results:
-* For wordc, the average runtime (from previous project) on my computer is
-  * Pangur Ban:     212.39 ms
-  * Hamlet:         560584.37 ms
+* For wordc, the average runtime  on my computer is
+  * Pangur Ban:     996.15 ms
+  * Hamlet:         655039.3 ms
   * Arabian nights:  28229117.71 ms
 * For wordc-mp n = 2
-	* Pangur Ban:      ms
-	* Hamlet:          ms
-	* Arabian nights:  ms
+	* Pangur Ban:   741   ms
+	* Hamlet:    158626 ms
+	* Arabian nights: 28604866.69 ms
 * For wordc-mp n = 4
-	* Pangur Ban:      ms
-	* Hamlet: 	   ms
+	* Pangur Ban:   971  ms
+	* Hamlet: 111883 ms
 	* Arabian nights:  ms
 * For wordc-mp n = 8
-	* Pangur Ban:      ms
-	* Hamlet: 	   ms
+	* Pangur Ban:  1494.25    ms
+	* Hamlet: 84051  ms
 	* Arabian nights:  ms
+
+For wordc-mp n = 2, it was faster. For n=4, it was closer to the speed of wordc. But for n=8, it was slower. 
 
 ## Sources used 
 The links from the internet and StackOverflow we used:
