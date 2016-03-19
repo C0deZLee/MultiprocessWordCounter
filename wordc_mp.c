@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
-#include <sys/wait.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
 
+// 1 is for write
 
 /* structure definition */
 typedef struct word_count {
@@ -19,7 +18,7 @@ typedef struct word_count {
 /* Global variable */
 word_count *HEAD = NULL;
 word_count *TAIL = NULL;
-int TOTAL_PROCESS_NUM = 4;
+int TOTAL_PROCESS_NUM = 2;
 
 /* reate a new list if we don't have a list */
 int create_list(char *val) {
@@ -167,7 +166,7 @@ int main(int argc, char *argv[]) {
     gettimeofday(&start, NULL);
 
     //TEMP:FILE *fp = fopen(argv[1], "r");                             // open the given file
-    FILE *fp = fopen("b.txt", "r");
+    FILE *fp = fopen("p.txt", "r");
     if (fp == NULL) {                                                  // exit if failed to open file
         perror("Failed to open file");
         exit(1);
@@ -195,18 +194,10 @@ int main(int argc, char *argv[]) {
 	int **fd;                                                          // this is an array of pointers. Every process has fd[0-2]. A way to identify pipes is to have fd[0-2][0-n]
     fd = (int**)malloc(TOTAL_PROCESS_NUM * sizeof(int*));              // allocates space for needed pointers
 
-	//TEMP: fd = (int**)malloc( argv[4] * sizeof(int*));// allocates space for needed pointers
-
-	for (int i = 0; i < TOTAL_PROCESS_NUM - 1; i++) {
+	for (int i = 0; i < TOTAL_PROCESS_NUM; i++) {                      // create pipe from 0 to TOTAL_PROCESS_NUM-1
 		fd[i] = (int*)malloc(2 * sizeof(int));
 		pipe(fd[i]);
 	}
-	/*
-	TEMP: for (int i = 0; i < argv[4]; i++)
-	{
-		fd[i] = (int*)malloc(2 * sizeof(int));
-		pipe(fd[i]);
-	}*/
 
     pid_t pid;                                                         // set up multi-process
 
@@ -215,78 +206,66 @@ int main(int argc, char *argv[]) {
         total_num_of_words++;                                          // get the number of total words in file
     }
 	partial_num_of_words = total_num_of_words / TOTAL_PROCESS_NUM;
-	//TEMP: partial_num_of_words = total_num_of_words / (int)argv[4];
 
-
-	for (int i = 1; i <= TOTAL_PROCESS_NUM - 1; i++) {                 //the number of children is TOTAL_PROCESS_NUM - 1
-        //TEMP:for (int i=1; i<=(int)argv[4] -1; i++) {                // the 4th arg is number of processes
-
+	for (int i = 1; i < TOTAL_PROCESS_NUM; i++) {                      //the number of children is 1 to TOTAL_PROCESS_NUM-1
 		pid = fork();                                                  // create new process
-
+        //-----------------------------------CHILD BORN-----------------------------------------------------------------
         if (pid == 0) {                                                // This is a CHILD process
+            close(fd[i][0]);                                           // close read end (no need)
             for (int j = partial_num_of_words*i; j < partial_num_of_words*(i + 1); j++) {
                 search_in_list(tokenized_file[j]);
             }
 
-            printf("This is a CHILD process, %d \n", i);
-			close(fd[i][0]); //close read end
-			 
 			for (struct word_count *curr = HEAD; curr != NULL; curr = curr->next){
-                write(fd[i][0], curr, strlen(curr));
-                //char *num = (char *) (curr->count + '0');    //By adding '0' a number becomes a char http://stackoverflow.com/questions/2279379/how-to-convert-integer-to-char-in-c
-				                                                        //There should be no number with more than 70 digits
-
-
-				//write(fd[i][0], curr->word, strlen(curr->word));      //sends word
-				//write(fd[i][0], num, strlen(num));                    //sends number
+                printf("%s ", curr->word);
+                write(fd[i][1], curr, sizeof(curr));
+                //char *num = (char *) (curr->count + '0');             //By adding '0' a number becomes a char
+				//write(fd[i][1], curr->word, strlen(curr->word));      //sends word
+				//write(fd[i][1], num, strlen(num));                    //sends number
 			}
-			 write(fd[i][0], NULL, sizeof(NULL));
-			 close(fd[i][1]); //close write end
-				 //when read looks like word1\0 5\0 so read stops every time when it hits null
+            //write(fd[i][1], NULL, sizeof(NULL));
+
+            close(fd[i][1]); //close write end
+            printf("This is a CHILD process %d finished piping \n", i);
             exit(0);                                                   // exit the child process since it done all work
+        //----------------------------------CHILD DEAD------------------------------------------------------------------
         }
-
-
+        else if(pid >0 && i==1){
+            for (int j=0; j<partial_num_of_words; j++) {               // parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
+                search_in_list(tokenized_file[j]);
+            }
+            printf("This is the PARENT process finished sorting\n");
+        }
 
         else if (pid < 0) {                                            // not a child, not a parent, then error
             printf("Failed to create new processes");
             exit(1);
         }
     }
-    // here below is parent
-    for (int j=0; j<partial_num_of_words; j++) {                   // first, parent sort first part, which is tokenized_file[0] - tokenized_file[partial_num_of_words]
-        search_in_list(tokenized_file[j]);
-    }
-
-    printf("This is the PARENT process\n");
-    struct word_count *buffer = (word_count *) malloc(sizeof(word_count));//must be able to hold the nodes passed
+    //-------------------------------------------PARENT IS START HERE, ALL CHILD DEAD------------------------------------------
+    //char buffer[10000];
+    char *word_buffer[80];                                          //must be able to hold the nodes passed
+    struct word_count *buffer = (word_count *) malloc (sizeof(word_count));
+    int num_buffer;
+    char byte = 0;
     close(fd[0][1]);                                               //close write end of parent
-    for (int i = 1; i <= TOTAL_PROCESS_NUM-1; i++) {
-        //TEMP:for (int i=1; i<=(int)argv[4]; i++) {                   // the 4th arg is number of processes
-        read(fd[i][0], buffer, strlen(buffer));
-
-            //read returns the number of bytes read. It returns 0 at end-of-file
-            printf("testing message: bytes_read is %d, buffer is %s", buffer->count);
-//                buffer[bytes_read] = 0;
-//				char* word, number;
-//				word = buffer[0];
-//				number = buffer[1];
-//				struct word_count *new_word = (word_count*) malloc (sizeof(word_count));
-//				new_word->word = (char *) word;
-//				new_word->count = (int) number - '0';//change back to int
-//                merge_list(new_word);
-            //reads a number of bytes from the file associated with fd and places the characters read into buffer
+    printf("This is the PARENT process started reading\n");
+    for (int j = 1; j < TOTAL_PROCESS_NUM; j++) {                  // child process is 1 to total-1
+        printf("This is the parent start reading inside\n");
+        while (read(fd[j][0], buffer, sizeof(word_count)) > 1){
+            printf("REad i byte");
+        }
 
     }
+
     close(fd[0][0]); //close read end of parent
-    // TODO: print result
+    //TEMP: printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
+
     gettimeofday(&end, NULL);                                          // get the total runtime
     long runtime = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec));
 
-    //TEMP:print_result(argv[2], argv[3], runtime);                    // print the result
 
     fclose(fp);                                                        // close the file
-    //TEMP: printf("Done. Total runtime: %ld\nThe result is in %s, and the runtime is in %s\n", runtime, argv[2], argv[3]);
     printf("runtime %ld", runtime);
 
     //free(raw_str);                                                   // Deallocates the allocations
