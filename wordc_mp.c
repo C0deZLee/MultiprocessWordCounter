@@ -95,41 +95,44 @@ int search_in_list(char *val) {
 int merge_list(word_count *s_val) {
     if (s_val->count != -1) {
         for (struct word_count *curr = HEAD; curr != NULL; curr = curr->next) {
-            if (strcmp(s_val->word, curr->word) == 0) {                     // val == curr
-                curr->count += s_val->count;
-            }
-            else if (strcmp(s_val->word, curr->word) < 0) {                 // val < curr
-                s_val->next = curr;
-                s_val->last = curr->last;
-                if (curr->last != NULL) {
-                    curr->last->next = s_val;
-                    curr->last = s_val;
+            if (s_val->word != NULL && curr->word != NULL) {
+                if (strcmp(s_val->word, curr->word) == 0) {                     // val == curr
+                    curr->count += s_val->count;
                 }
-                else {
-                    curr->last = s_val;
-                    HEAD = s_val;
+                else if (strcmp(s_val->word, curr->word) < 0) {                 // val < curr
+                    s_val->next = curr;
+                    s_val->last = curr->last;
+                    if (curr->last != NULL) {
+                        curr->last->next = s_val;
+                        curr->last = s_val;
+                    }
+                    else {
+                        curr->last = s_val;
+                        HEAD = s_val;
+                    }
+                    return 0;
                 }
-                return 0;
-            }
 
-            else if (strcmp(s_val->word, curr->word) > 0 &&
-                     (curr->next == NULL ||
-                      strcmp(s_val->word, curr->next->word) < 0)) {       // s_val>curr, insert behind
-                s_val->next = curr->next;
-                s_val->last = curr;
-                if (curr->next != NULL) {
-                    curr->next->last = s_val;
-                    curr->next = s_val;
+                else if (strcmp(s_val->word, curr->word) > 0 &&
+                         (curr->next == NULL ||
+                          strcmp(s_val->word, curr->next->word) < 0)) {       // s_val>curr, insert behind
+                    s_val->next = curr->next;
+                    s_val->last = curr;
+                    if (curr->next != NULL) {
+                        curr->next->last = s_val;
+                        curr->next = s_val;
+                    }
+                    else {
+                        curr->next = s_val;
+                        TAIL = s_val;
+                    }
+                    return 0;
                 }
-                else {
-                    curr->next = s_val;
-                    TAIL = s_val;
-                }
-                return 0;
             }
         }
     }
 }
+
 
 /* Remove punctuation and make all lowercase */
 char *word_format(char *raw_str) {
