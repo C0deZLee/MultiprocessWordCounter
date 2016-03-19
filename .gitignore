@@ -15,3 +15,5 @@ Muti-process-Word-Counter.vcxproj
 *.sln
 *.opensdf
 Muti-process-Word-Counter.sdf
+
+*.save
