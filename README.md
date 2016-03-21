@@ -1,11 +1,13 @@
-CS311 Project2. Authors: Jesse Rong (jbr5205) Sec 001 and Xiang(Steve) Li (xpl5016) Sec 001
+Authors: Jesse Rong (jbr5205) Sec 001 and Xiang(Steve) Li (xpl5016) Sec 001
 
+# CS311 Project2
 This program is for the CMPSC 311 Project 2. It's a word counter that uses processes.
 This program is written in C.
 
 
 ## Discription
 *	Our C program uses a linked list of structures to organize words. The main function tokenizes the words in the file and counts them with functions. The parent process creates the children and the tokens are divided equally among the number of processes. Once the children are done with the tokens, they use pipes to transfer the word and word count seperately to the parent.  
+* github:https://github.com/SteveLeeLX/Muti-process-Word-Counter
 
 ## Difficulties: 
 * We were not very familiar with pipes. Learning more about pipes, read(), write(), and file descriptors took a lot of time. 
@@ -43,7 +45,7 @@ This program is written in C.
 	* Hamlet: 84051  ms
 	* Arabian nights: 65496590.6 ms
 
-For wordc-mp n = 2, it was faster. For n=4, it was closer to the speed of wordc. But for n=8, it was slower. 
+For wordc-mp n = 2, it was faster. For n=4, it was closer to the speed of wordc. But for n=8, it was slower for panger, but faster for the other two. 
 
 ## Sources used 
 The links from the internet and StackOverflow we used:
