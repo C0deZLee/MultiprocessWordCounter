@@ -1,5 +1,3 @@
-Authors: Jesse Rong (jbr5205) Sec 001 and Xiang(Steve) Li (xpl5016) Sec 001
-
 # CS311 Project2
 This program is for the CMPSC 311 Project 2. It's a word counter that uses processes.
 This program is written in C.
